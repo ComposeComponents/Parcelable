@@ -19,18 +19,43 @@
 ![Stable](https://img.shields.io/github/v/release/ComposeComponents/Parcelable?label=Stable)
 ![Preview](https://img.shields.io/github/v/release/ComposeComponents/Parcelable?label=Preview&include_prereleases)
 
-```
-implementation "cl.emilym.kmp:parcelable:<latest>"
-```
-
-## Usage
 Add the `kotlin-parcelize` class to your plugins:
 
 ```kotlin
-CompositionLocalProvider(
-    LocalBaseDp provides 8.dp
-) {
-    // Box is sized to 16dp by 16dp
-    Box(Modifier.size(2.rdp))
+plugins {
+    ...
+    id("kotlin-parcelize")
 }
+```
+
+then add the following line to your `androidTarget` configuration:
+```kotlin
+kotlin {
+    androidTarget {
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.addAll("-P", "plugin:org.jetbrains.kotlin.parcelize:additionalAnnotation=cl.emilym.kmp.parcelable.Parcelize")
+                }
+            }
+        }
+    }
+}
+```
+
+then add the dependency:
+```kotlin
+implementation("cl.emilym.kmp:parcelable:<latest>")
+```
+
+## Usage
+
+```kotlin
+import cl.emilym.kmp.parcelable.Parcelable
+import cl.emilym.kmp.parcelable.Parcelize
+
+@Parcelize
+data class Thing(
+    val data: String
+): Parcelable
 ```
