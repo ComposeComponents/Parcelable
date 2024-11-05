@@ -12,6 +12,8 @@ lifecycleRuntimeKtx = "2.8.7"
 composeBom = "2024.04.01"
 appcompat = "1.7.0"
 material = "1.12.0"
+dokkaVersion = "1.9.20"
+mavenPublish = "0.30.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -40,3 +42,5 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokkaVersion" }
+mavenPublish = { id = "com.vanniktech.maven.publish.base", version.ref = "mavenPublish" }
