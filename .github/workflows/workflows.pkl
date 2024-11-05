@@ -1,0 +1,9 @@
+amends "pkl/src/render.pkl"
+
+_modules = new Listing {
+    "parcelable"
+}
+workflows = new Listing {
+    import("pkl/src/build-kmp-lib.pkl")
+    import("pkl/src/lint.pkl")
+}

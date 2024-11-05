@@ -1,11 +1,11 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'parcelable'
-    spec.version                  = '1.0'
-    spec.homepage                 = 'Link to the Shared Module homepage'
+    spec.version                  = '0.0.1'
+    spec.homepage                 = ''
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
     spec.license                  = ''
-    spec.summary                  = 'Some description for the Shared Module'
+    spec.summary                  = 'Use `@Parcelize` in your Kotlin Multiplatform Projects'
     spec.vendored_frameworks      = 'build/cocoapods/framework/parcelable.framework'
     spec.libraries                = 'c++'
     spec.ios.deployment_target    = '16.0'
