@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinCocoapods)
     alias(libs.plugins.androidLibrary)
-    id("kotlin-parcelize")
     alias(libs.plugins.dokka)
     alias(libs.plugins.mavenPublish)
 }
@@ -39,6 +38,10 @@ kotlin {
             isStatic = true
         }
     }
+
+    androidTarget {
+        publishLibraryVariants("release")
+    }
     
     sourceSets {
         commonMain.dependencies {
@@ -63,6 +66,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    apply(plugin = "kotlin-parcelize")
 }
 
 mavenPublishing {
