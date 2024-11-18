@@ -17,15 +17,16 @@ jobs:
         module:
         - parcelable
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: temurin
+    - name: Setup gradle
+      uses: gradle/actions/setup-gradle@v3
     - name: Lint with Gradle
-      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-      with:
-        arguments: ${{ matrix.module }}:lintVitalRelease
+      env: {}
+      run: ./gradlew ${{ matrix.module }}:lintVitalRelease

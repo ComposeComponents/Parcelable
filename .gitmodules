@@ -1,3 +1,0 @@
-[submodule ".github/workflows/pkl"]
-	path = .github/workflows/pkl
-	url = git@github.com:ComposeComponents/ActionsPkl.git

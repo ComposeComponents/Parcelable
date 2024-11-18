@@ -16,23 +16,31 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.gitversion.outputs.semVer }}
-      versionCode: ${{ steps.run_number.outputs.versionCode }}
+      versionCode: ${{ steps.run-number.outputs.versionCode }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.6
+      uses: gittools/actions/gitversion/setup@v3.0.0
       with:
         versionSpec: 5.x
     - id: gitversion
       name: Use GitVersion
-      uses: gittools/actions/gitversion/execute@v0.9.6
+      uses: gittools/actions/gitversion/execute@v3.0.0
       with:
         useConfigFile: true
         configFilePath: ./gitversion.yml
-    - name: Display SemVer
-      run: 'echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"'
+    - id: run-number
+      run: |-
+        current_run_number=${{ github.run_number }}
+        new_number=$((current_run_number+0))
+        echo "versionCode=${new_number}" >> $GITHUB_OUTPUT
+    - name: Generate Job Summary
+      run: |-
+        echo "# Version Info
+        Semantic Version: ${{ steps.gitversion.outputs.semVer }}
+        Version Number: ${{ steps.run-number.outputs.versionCode }}" >> $GITHUB_STEP_SUMMARY
   build-android:
     needs:
     - version
@@ -47,26 +55,26 @@ jobs:
           needsZip: false
           artifactMimeType: application/zip
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: temurin
+    - name: Setup gradle
+      uses: gradle/actions/setup-gradle@v3
     - name: Build with Gradle
       env:
         ORG_GRADLE_PROJECT_version: ${{ needs.version.outputs.version }}
-      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-      with:
-        arguments: ${{ matrix.configuration.buildCommand }}
+      run: ./gradlew ${{ matrix.configuration.buildCommand }}
     - name: Rename Artifact
       run: mv ${{ matrix.configuration.filesystemLocation }} ./${{ matrix.configuration.artifactName }}
     - name: Zip if needed
       if: ${{ matrix.configuration.needsZip }}
       run: zip -r ${{ matrix.configuration.artifactName }}.zip ./${{ matrix.configuration.artifactName }}
-    - uses: actions/upload-artifact@master
+    - uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.configuration.artifactKey }}
         path: ./${{ matrix.configuration.artifactName }}${{ matrix.configuration.needsZip && '.zip' || '' }}
@@ -96,26 +104,26 @@ jobs:
           needsZip: true
           artifactMimeType: application/zip
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: temurin
+    - name: Setup gradle
+      uses: gradle/actions/setup-gradle@v3
     - name: Build with Gradle
       env:
         ORG_GRADLE_PROJECT_version: ${{ needs.version.outputs.version }}
-      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-      with:
-        arguments: ${{ matrix.configuration.buildCommand }}
+      run: ./gradlew ${{ matrix.configuration.buildCommand }}
     - name: Rename Artifact
       run: mv ${{ matrix.configuration.filesystemLocation }} ./${{ matrix.configuration.artifactName }}
     - name: Zip if needed
       if: ${{ matrix.configuration.needsZip }}
       run: zip -r ${{ matrix.configuration.artifactName }}.zip ./${{ matrix.configuration.artifactName }}
-    - uses: actions/upload-artifact@master
+    - uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.configuration.artifactKey }}
         path: ./${{ matrix.configuration.artifactName }}${{ matrix.configuration.needsZip && '.zip' || '' }}
@@ -129,9 +137,13 @@ jobs:
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: Create tag for release
+      uses: rickstaa/action-create-tag@v1
+      with:
+        tag: v${{ needs.version.outputs.version }}
     - id: create_release
       name: Create Release
       uses: softprops/action-gh-release@v2
@@ -164,7 +176,7 @@ jobs:
           name: parcelable-android.aar
           mimeType: application/zip
     steps:
-    - uses: actions/download-artifact@master
+    - uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.artifact.key }}
         path: ./
@@ -175,7 +187,7 @@ jobs:
     - name: Upload Artifact to Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      uses: actions/upload-release-asset@v1
+      uses: shogo82148/actions-upload-release-asset@v1
       with:
         upload_url: ${{ needs.release.outputs.upload_url }}
         asset_path: ./${{ matrix.artifact.name }}
@@ -193,26 +205,26 @@ jobs:
         module:
         - parcelable
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: temurin
+    - name: Setup gradle
+      uses: gradle/actions/setup-gradle@v3
     - name: Build with Gradle
       env:
         ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
         ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
         ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.PGP_SECRET_KMP }}
         ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.PGP_PASSPHRASE }}
-      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-      with:
-        arguments: |-
-          -Pversion=${{ needs.version.outputs.version }}
-          -Ppom.url="https://github.com/${{ github.repository }}"
-          -Ppom.scm.connection="scm:git:git://github.com/${{ github.repository }}"
-          -Ppom.scm.developerConnection="scm:git:ssh://github.com/${{ github.repository }}"
-          -Ppom.scm.url="https://github.com/${{ github.repository }}"
-          ${{ matrix.module }}:publishAndReleaseToMavenCentral --no-configuration-cache
+      run: |-
+        ./gradlew -Pversion=${{ needs.version.outputs.version }} \
+        -Ppom.url="https://github.com/${{ github.repository }}" \
+        -Ppom.scm.connection="scm:git:git://github.com/${{ github.repository }}" \
+        -Ppom.scm.developerConnection="scm:git:ssh://github.com/${{ github.repository }}" \
+        -Ppom.scm.url="https://github.com/${{ github.repository }}" \
+        ${{ matrix.module }}:publishAndReleaseToMavenCentral --no-configuration-cache

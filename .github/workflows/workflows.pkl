@@ -1,9 +1,9 @@
-amends "pkl/src/render.pkl"
+amends "package://components.emilym.cl/actions/actions@0.1.8#/render.pkl"
 
 _modules = new Listing {
     "parcelable"
 }
 workflows = new Listing {
-    import("pkl/src/build-kmp-lib.pkl")
-    import("pkl/src/lint.pkl")
+    import("package://components.emilym.cl/actions/actions@0.1.8#/build-kmp-lib.pkl")
+    import("package://components.emilym.cl/actions/actions@0.1.8#/lint.pkl")
 }
